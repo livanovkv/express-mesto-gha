@@ -1,10 +1,15 @@
 const router = require('express').Router();
 
-const { getUsers, getUser, createUser } = require('../controllers/users');
+const {
+  getUsers, getUser, createUser, updateUser, updateUserAvatar,
+} = require('../controllers/users');
 
+//* Принимаем запросы
 router
   .get('/', getUsers)
   .get('/:id', getUser)
-  .post('/', createUser);
+  .post('/', createUser)
+  .patch('/me', updateUser)
+  .patch('/me/avatar', updateUserAvatar);
 
 module.exports = router;
