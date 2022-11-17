@@ -4,7 +4,6 @@ const {
   getUsers, getUser, createUser, updateUser, updateUserAvatar,
 } = require('../controllers/users');
 
-//* Принимаем запросы
 router
   .get('/', getUsers)
   .get('/:id', getUser)

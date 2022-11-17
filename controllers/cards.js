@@ -8,7 +8,13 @@ module.exports.getCards = (req, res) => {
         .status(200)
         .send(cards);
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      res
+        .status(500)
+        .send({
+          message: `${err.name}: ${err.message}`,
+        });
+    });
 };
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
@@ -19,17 +25,38 @@ module.exports.createCard = (req, res) => {
         .status(201)
         .send(card);
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res
+          .status(400)
+          .send({ message: `${err.name}: ${err.message}` });
+      } else {
+        res
+          .status(500)
+          .send({ message: `${err.name}: ${err.message}` });
+      }
+    });
 };
 module.exports.deleteCard = (req, res) => {
   Card
     .findByIdAndRemove(req.params.cardId)
-    .then((cards) => {
+    .orFail(new Error('Такой карточки нет'))
+    .then((card) => {
       res
         .status(200)
-        .send(cards);
+        .send({ message: 'Пост удалён', card });
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      if (err.name === 'Error') {
+        res
+          .status(404)
+          .send({ message: `${err.name}: ${err.message}` });
+      } else {
+        res
+          .status(400)
+          .send({ message: `${err.name}: ${err.message}` });
+      }
+    });
 };
 module.exports.likeCard = (req, res) => {
   Card
@@ -38,12 +65,23 @@ module.exports.likeCard = (req, res) => {
       { $addToSet: { likes: req.user._id } },
       { new: true },
     )
+    .orFail(new Error('Такой карточки нет'))
     .then((card) => {
       res
         .status(200)
         .send(card);
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      if (err.name === 'Error') {
+        res
+          .status(404)
+          .send({ message: `${err.name}: ${err.message}` });
+      } else {
+        res
+          .status(400)
+          .send({ message: `${err.name}: ${err.message}` });
+      }
+    });
 };
 module.exports.dislikeCard = (req, res) => {
   Card
@@ -52,10 +90,21 @@ module.exports.dislikeCard = (req, res) => {
       { $pull: { likes: req.user._id } },
       { new: true },
     )
+    .orFail(new Error('Такой карточки нет'))
     .then((card) => {
       res
         .status(200)
         .send(card);
     })
-    .catch((err) => console.error(err));
+    .catch((err) => {
+      if (err.name === 'Error') {
+        res
+          .status(404)
+          .send({ message: `${err.name}: ${err.message}` });
+      } else {
+        res
+          .status(400)
+          .send({ message: `${err.name}: ${err.message}` });
+      }
+    });
 };

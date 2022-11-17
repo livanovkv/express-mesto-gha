@@ -1,39 +1,43 @@
 const User = require('../models/user');
 
+const {
+  codOk, codCreated, codBadRequest, codForbidden,
+  codInternalServerError, createdMessageError,
+  textErrorNoUser,
+} = require('../utils/constants');
+
 module.exports.getUsers = (req, res) => {
   User
     .find({})
     .then((users) => {
       res
-        .status(200)
+        .status(codOk)
         .send(users);
     })
     .catch((err) => {
       res
-        .status(500)
-        .send({
-          message: `${err.name}: ${err.message}`,
-        });
+        .status(codInternalServerError)
+        .send(createdMessageError(err));
     });
 };
 module.exports.getUser = (req, res) => {
   User
     .findById(req.params.id)
-    .orFail(new Error('Такого пользователя нет'))
+    .orFail(new Error(textErrorNoUser))
     .then((user) => {
       res
-        .status(200)
+        .status(codOk)
         .send(user);
     })
     .catch((err) => {
       if (err.name === 'Error') {
         res
-          .status(404)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codForbidden)
+          .send(createdMessageError(err));
       } else {
         res
-          .status(400)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codBadRequest)
+          .send(createdMessageError(err));
       }
     });
 };
@@ -43,25 +47,25 @@ module.exports.updateUser = (req, res) => {
       new: true,
       runValidators: true,
     })
-    .orFail(new Error('Такого пользователя нет'))
+    .orFail(new Error(textErrorNoUser))
     .then((user) => {
       res
-        .status(200)
+        .status(codOk)
         .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
-          .status(400)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codBadRequest)
+          .send(createdMessageError(err));
       } if (err.name === 'Error') {
         res
-          .status(404)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codForbidden)
+          .send(createdMessageError(err));
       } else {
         res
-          .status(500)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codInternalServerError)
+          .send(createdMessageError(err));
       }
     });
 };
@@ -71,25 +75,25 @@ module.exports.updateUserAvatar = (req, res) => {
       new: true,
       runValidators: true,
     })
-    .orFail(new Error('Такого пользователя нет'))
+    .orFail(new Error(textErrorNoUser))
     .then((user) => {
       res
-        .status(200)
+        .status(codOk)
         .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
-          .status(400)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codBadRequest)
+          .send(createdMessageError(err));
       } if (err.name === 'Error') {
         res
-          .status(404)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codForbidden)
+          .send(createdMessageError(err));
       } else {
         res
-          .status(500)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codInternalServerError)
+          .send(createdMessageError(err));
       }
     });
 };
@@ -98,18 +102,18 @@ module.exports.createUser = (req, res) => {
     .create(req.body)
     .then((user) => {
       res
-        .status(201)
+        .status(codCreated)
         .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
-          .status(400)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codBadRequest)
+          .send(createdMessageError(err));
       } else {
         res
-          .status(500)
-          .send({ message: `${err.name}: ${err.message}` });
+          .status(codInternalServerError)
+          .send(createdMessageError(err));
       }
     });
 };
