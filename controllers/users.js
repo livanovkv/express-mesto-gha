@@ -2,7 +2,7 @@ const User = require('../models/user');
 
 const {
   CODE_OK, CODE_CREATED, CODE_BAD_REQUEST, CODE_NOT_FOUND,
-  CODE_INTERNAL_SERVER_ERRORE, TEXT_ERRORE_NO_USER,
+  CODE_INTERNAL_SERVER_ERRORE, TEXT_ERRORE_NO_USER, TEXT_ERRORE_DATA,
 } = require('../utils/constants');
 
 const { createdMessageError } = require('../utils/utils');
@@ -36,7 +36,7 @@ module.exports.getUser = (req, res) => {
       if (err.name === 'CastError') {
         res
           .status(CODE_BAD_REQUEST)
-          .send({ message: 'Переданы некорректные данные' });
+          .send({ message: TEXT_ERRORE_DATA });
       }
       if (err.message === TEXT_ERRORE_NO_USER) {
         res

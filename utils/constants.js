@@ -11,3 +11,5 @@ module.exports.CODE_INTERNAL_SERVER_ERRORE = 500;
 module.exports.TEXT_ERRORE_NO_USER = 'Такого пользователя нет';
 
 module.exports.TEXT_ERRORE_NO_CARD = 'Такой карточки нет';
+
+module.exports.TEXT_ERRORE_DATA = 'Переданы некорректные данные';
