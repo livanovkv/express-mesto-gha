@@ -1,8 +1,8 @@
 const Card = require('../models/card');
 
 const {
-  codOk, codCreated, codBadRequest, codNotFound,
-  codInternalServerError, textErrorNoCard,
+  CODE_OK, CODE_CREATED, CODE_BAD_REQUEST, CODE_NOT_FOUND,
+  CODE_INTERNAL_SERVER_ERRORE, TEXT_ERRORE_NO_CARD,
 } = require('../utils/constants');
 
 const { createdMessageError } = require('../utils/utils');
@@ -12,12 +12,12 @@ module.exports.getCards = (req, res) => {
     .find({})
     .then((cards) => {
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send(cards);
     })
     .catch((err) => {
       res
-        .status(codInternalServerError)
+        .status(CODE_INTERNAL_SERVER_ERRORE)
         .send(createdMessageError(err));
     });
 };
@@ -27,17 +27,17 @@ module.exports.createCard = (req, res) => {
     .create({ name, link, owner: req.user._id })
     .then((card) => {
       res
-        .status(codCreated)
+        .status(CODE_CREATED)
         .send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
-          .status(codBadRequest)
+          .status(CODE_BAD_REQUEST)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codInternalServerError)
+          .status(CODE_INTERNAL_SERVER_ERRORE)
           .send(createdMessageError(err));
       }
     });
@@ -47,20 +47,24 @@ module.exports.deleteCard = (req, res) => {
     .findByIdAndRemove(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new Error(textErrorNoCard);
+        throw new Error(TEXT_ERRORE_NO_CARD);
       }
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send({ message: 'Пост удалён', card });
     })
     .catch((err) => {
-      if (err.message === textErrorNoCard) {
+      if (err.name === 'CastError') {
         res
-          .status(codNotFound)
+          .status(CODE_BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
+      } else if (err.message === TEXT_ERRORE_NO_CARD) {
+        res
+          .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codInternalServerError)
+          .status(CODE_INTERNAL_SERVER_ERRORE)
           .send(createdMessageError(err));
       }
     });
@@ -74,20 +78,20 @@ module.exports.likeCard = (req, res) => {
     )
     .then((card) => {
       if (!card) {
-        throw new Error(textErrorNoCard);
+        throw new Error(TEXT_ERRORE_NO_CARD);
       }
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send(card);
     })
     .catch((err) => {
-      if (err.message === textErrorNoCard) {
+      if (err.message === TEXT_ERRORE_NO_CARD) {
         res
-          .status(codNotFound)
+          .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codBadRequest)
+          .status(CODE_BAD_REQUEST)
           .send(createdMessageError(err));
       }
     });
@@ -101,20 +105,24 @@ module.exports.dislikeCard = (req, res) => {
     )
     .then((card) => {
       if (!card) {
-        throw new Error(textErrorNoCard);
+        throw new Error(TEXT_ERRORE_NO_CARD);
       }
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send(card);
     })
     .catch((err) => {
-      if (err.message === textErrorNoCard) {
+      if (err.name === 'CastError') {
         res
-          .status(codNotFound)
+          .status(CODE_BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные для снятия лайка' });
+      } else if (err.message === TEXT_ERRORE_NO_CARD) {
+        res
+          .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codInternalServerError)
+          .status(CODE_INTERNAL_SERVER_ERRORE)
           .send(createdMessageError(err));
       }
     });

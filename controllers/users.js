@@ -1,8 +1,8 @@
 const User = require('../models/user');
 
 const {
-  codOk, codCreated, codBadRequest, codNotFound,
-  codInternalServerError, textErrorNoUser,
+  CODE_OK, CODE_CREATED, CODE_BAD_REQUEST, CODE_NOT_FOUND,
+  CODE_INTERNAL_SERVER_ERRORE, TEXT_ERRORE_NO_USER,
 } = require('../utils/constants');
 
 const { createdMessageError } = require('../utils/utils');
@@ -12,12 +12,12 @@ module.exports.getUsers = (req, res) => {
     .find({})
     .then((users) => {
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send(users);
     })
     .catch((err) => {
       res
-        .status(codInternalServerError)
+        .status(CODE_INTERNAL_SERVER_ERRORE)
         .send(createdMessageError(err));
     });
 };
@@ -26,20 +26,25 @@ module.exports.getUser = (req, res) => {
     .findById(req.params.id)
     .then((user) => {
       if (!user) {
-        throw new Error(textErrorNoUser);
+        throw new Error(TEXT_ERRORE_NO_USER);
       }
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send(user);
     })
     .catch((err) => {
-      if (err.message === textErrorNoUser) {
+      if (err.name === 'CastError') {
         res
-          .status(codNotFound)
+          .status(CODE_BAD_REQUEST)
+          .send({ message: 'Переданы некорректные данные' });
+      }
+      if (err.message === TEXT_ERRORE_NO_USER) {
+        res
+          .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codInternalServerError)
+          .status(CODE_INTERNAL_SERVER_ERRORE)
           .send(createdMessageError(err));
       }
     });
@@ -52,24 +57,24 @@ module.exports.updateUser = (req, res) => {
     })
     .then((user) => {
       if (!user) {
-        throw new Error(textErrorNoUser);
+        throw new Error(TEXT_ERRORE_NO_USER);
       }
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
-          .status(codBadRequest)
+          .status(CODE_BAD_REQUEST)
           .send(createdMessageError(err));
-      } else if (err.message === textErrorNoUser) {
+      } else if (err.message === TEXT_ERRORE_NO_USER) {
         res
-          .status(codNotFound)
+          .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codInternalServerError)
+          .status(CODE_INTERNAL_SERVER_ERRORE)
           .send(createdMessageError(err));
       }
     });
@@ -82,24 +87,24 @@ module.exports.updateUserAvatar = (req, res) => {
     })
     .then((user) => {
       if (!user) {
-        throw new Error(textErrorNoUser);
+        throw new Error(TEXT_ERRORE_NO_USER);
       }
       res
-        .status(codOk)
+        .status(CODE_OK)
         .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
-          .status(codBadRequest)
+          .status(CODE_BAD_REQUEST)
           .send(createdMessageError(err));
-      } else if (err.message === textErrorNoUser) {
+      } else if (err.message === TEXT_ERRORE_NO_USER) {
         res
-          .status(codNotFound)
+          .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codInternalServerError)
+          .status(CODE_INTERNAL_SERVER_ERRORE)
           .send(createdMessageError(err));
       }
     });
@@ -109,17 +114,17 @@ module.exports.createUser = (req, res) => {
     .create(req.body)
     .then((user) => {
       res
-        .status(codCreated)
+        .status(CODE_CREATED)
         .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res
-          .status(codBadRequest)
+          .status(CODE_BAD_REQUEST)
           .send(createdMessageError(err));
       } else {
         res
-          .status(codInternalServerError)
+          .status(CODE_INTERNAL_SERVER_ERRORE)
           .send(createdMessageError(err));
       }
     });

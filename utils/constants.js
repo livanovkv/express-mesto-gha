@@ -1,13 +1,13 @@
-module.exports.codOk = 200;
+module.exports.CODE_OK = 200;
 
-module.exports.codCreated = 201;
+module.exports.CODE_CREATED = 201;
 
-module.exports.codBadRequest = 400;
+module.exports.CODE_BAD_REQUEST = 400;
 
-module.exports.codNotFound = 404;
+module.exports.CODE_NOT_FOUND = 404;
 
-module.exports.codInternalServerError = 500;
+module.exports.CODE_INTERNAL_SERVER_ERRORE = 500;
 
-module.exports.textErrorNoUser = 'Такого пользователя нет';
+module.exports.TEXT_ERRORE_NO_USER = 'Такого пользователя нет';
 
-module.exports.textErrorNoCard = 'Такой карточки нет';
+module.exports.TEXT_ERRORE_NO_CARD = 'Такой карточки нет';
