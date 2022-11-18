@@ -38,7 +38,7 @@ module.exports.getUser = (req, res) => {
           .status(CODE_BAD_REQUEST)
           .send({ message: TEXT_ERRORE_DATA });
       }
-      if (err.message === TEXT_ERRORE_NO_USER) {
+      else if (err.message === TEXT_ERRORE_NO_USER) {
         res
           .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));

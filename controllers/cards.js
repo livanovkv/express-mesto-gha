@@ -84,8 +84,12 @@ module.exports.likeCard = (req, res) => {
         .status(CODE_OK)
         .send(card);
     })
-    .catch((err) => {
-      if (err.message === TEXT_ERRORE_NO_CARD) {
+		.catch((err) => {
+			if (err.name === 'CastError') {
+        res
+          .status(CODE_BAD_REQUEST)
+          .send({ message: TEXT_ERRORE_DATA });
+      } else if (err.message === TEXT_ERRORE_NO_CARD) {
         res
           .status(CODE_NOT_FOUND)
           .send(createdMessageError(err));
