@@ -1,10 +1,11 @@
 const User = require('../models/user');
 
 const {
-  codOk, codCreated, codBadRequest, codForbidden,
-  codInternalServerError, createdMessageError,
-  textErrorNoUser,
+  codOk, codCreated, codBadRequest, codNotFound,
+  codInternalServerError, textErrorNoUser,
 } = require('../utils/constants');
+
+const { createdMessageError } = require('../utils/utils');
 
 module.exports.getUsers = (req, res) => {
   User
@@ -23,16 +24,18 @@ module.exports.getUsers = (req, res) => {
 module.exports.getUser = (req, res) => {
   User
     .findById(req.params.id)
-    .orFail(new Error(textErrorNoUser))
     .then((user) => {
+      if (!user) {
+        throw new Error(textErrorNoUser);
+      }
       res
         .status(codOk)
         .send(user);
     })
     .catch((err) => {
-      if (err.name === 'Error') {
+      if (err.message === textErrorNoUser) {
         res
-          .status(codForbidden)
+          .status(codNotFound)
           .send(createdMessageError(err));
       } else {
         res
@@ -47,8 +50,10 @@ module.exports.updateUser = (req, res) => {
       new: true,
       runValidators: true,
     })
-    .orFail(new Error(textErrorNoUser))
     .then((user) => {
+      if (!user) {
+        throw new Error(textErrorNoUser);
+      }
       res
         .status(codOk)
         .send(user);
@@ -58,9 +63,9 @@ module.exports.updateUser = (req, res) => {
         res
           .status(codBadRequest)
           .send(createdMessageError(err));
-      } if (err.name === 'Error') {
+      } if (err.message === textErrorNoUser) {
         res
-          .status(codForbidden)
+          .status(codNotFound)
           .send(createdMessageError(err));
       } else {
         res
@@ -75,8 +80,10 @@ module.exports.updateUserAvatar = (req, res) => {
       new: true,
       runValidators: true,
     })
-    .orFail(new Error(textErrorNoUser))
     .then((user) => {
+      if (!user) {
+        throw new Error(textErrorNoUser);
+      }
       res
         .status(codOk)
         .send(user);
@@ -86,9 +93,9 @@ module.exports.updateUserAvatar = (req, res) => {
         res
           .status(codBadRequest)
           .send(createdMessageError(err));
-      } if (err.name === 'Error') {
+      } if (err.message === textErrorNoUser) {
         res
-          .status(codForbidden)
+          .status(codNotFound)
           .send(createdMessageError(err));
       } else {
         res

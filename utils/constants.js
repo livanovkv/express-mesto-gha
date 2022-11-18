@@ -4,7 +4,7 @@ module.exports.codCreated = 201;
 
 module.exports.codBadRequest = 400;
 
-module.exports.codForbidden = 404;
+module.exports.codNotFound = 404;
 
 module.exports.codInternalServerError = 500;
 
