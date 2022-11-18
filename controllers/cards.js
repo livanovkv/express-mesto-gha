@@ -1,5 +1,4 @@
 const Card = require('../models/card');
-
 const {
   CODE_OK, CODE_CREATED, CODE_BAD_REQUEST, CODE_NOT_FOUND,
   CODE_INTERNAL_SERVER_ERRORE, TEXT_ERRORE_NO_CARD, TEXT_ERRORE_DATA,
@@ -84,8 +83,8 @@ module.exports.likeCard = (req, res) => {
         .status(CODE_OK)
         .send(card);
     })
-		.catch((err) => {
-			if (err.name === 'CastError') {
+    .catch((err) => {
+      if (err.name === 'CastError') {
         res
           .status(CODE_BAD_REQUEST)
           .send({ message: TEXT_ERRORE_DATA });
