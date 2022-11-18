@@ -8,6 +8,6 @@ module.exports.codNotFound = 404;
 
 module.exports.codInternalServerError = 500;
 
-module.exports.createdMessageError = (err) => ({ message: `${err.name}: ${err.message}` });
-
 module.exports.textErrorNoUser = 'Такого пользователя нет';
+
+module.exports.textErrorNoCard = 'Такой карточки нет';
