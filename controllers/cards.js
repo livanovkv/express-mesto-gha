@@ -60,7 +60,7 @@ module.exports.deleteCard = (req, res) => {
           .send(createdMessageError(err));
       } else {
         res
-          .status(codBadRequest)
+          .status(codInternalServerError)
           .send(createdMessageError(err));
       }
     });
@@ -114,7 +114,7 @@ module.exports.dislikeCard = (req, res) => {
           .send(createdMessageError(err));
       } else {
         res
-          .status(codBadRequest)
+          .status(codInternalServerError)
           .send(createdMessageError(err));
       }
     });

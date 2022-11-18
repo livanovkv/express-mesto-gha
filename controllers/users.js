@@ -39,7 +39,7 @@ module.exports.getUser = (req, res) => {
           .send(createdMessageError(err));
       } else {
         res
-          .status(codBadRequest)
+          .status(codInternalServerError)
           .send(createdMessageError(err));
       }
     });
@@ -63,7 +63,7 @@ module.exports.updateUser = (req, res) => {
         res
           .status(codBadRequest)
           .send(createdMessageError(err));
-      } if (err.message === textErrorNoUser) {
+      } else if (err.message === textErrorNoUser) {
         res
           .status(codNotFound)
           .send(createdMessageError(err));
@@ -93,7 +93,7 @@ module.exports.updateUserAvatar = (req, res) => {
         res
           .status(codBadRequest)
           .send(createdMessageError(err));
-      } if (err.message === textErrorNoUser) {
+      } else if (err.message === textErrorNoUser) {
         res
           .status(codNotFound)
           .send(createdMessageError(err));
