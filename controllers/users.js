@@ -129,7 +129,7 @@ module.exports.login = (req, res, next) => {
         { _id: user._id },
         NODE_ENV === 'production'
           ? JWT_SECRET
-          : '637692aad0a0090428bc3fd0',
+          : '637fca34917bfc0782ce3e49',
         { expiresIn: '7d' },
       );
       res

@@ -18,22 +18,16 @@ const { PORT = 3000 } = process.env;
 
 const usersRouter = require('./routes/users');
 
-//* Импортировать модуль cards
 const cardsRouter = require('./routes/cards');
 
-//* Создаем приложение методом express
 const app = express();
 
-//* Подключаемся к серверу mongo
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
-//* Импорт controllers
 const { login, createUser } = require('./controllers/users');
 
-//* Импорт мидлвэр авторизации для зашиты роутов
 const auth = require('./middlewares/auth');
 
-//* Импорт констант
 const {
   CODE_INTERNAL_SERVER_ERRORE,
   TEXT_ERRORE_INTERNAL_SERVER,

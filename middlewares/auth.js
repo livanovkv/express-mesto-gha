@@ -14,7 +14,7 @@ module.exports = (req, res, next) => {
       token,
       NODE_ENV === 'production'
         ? JWT_SECRET
-        : '637692aad0a0090428bc3fd0',
+        : '637fca34917bfc0782ce3e49',
     );
   } catch (err) {
     next(new AuthError(TEXT_ERRORE_AUTH_REQUIRED));
