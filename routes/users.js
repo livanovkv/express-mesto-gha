@@ -1,14 +1,30 @@
 const router = require('express').Router();
 
+const { celebrate, Joi } = require('celebrate');
+
 const {
-  getUsers, getUser, createUser, updateUser, updateUserAvatar,
+  getUsers, getUser, getUserInfo,
+  updateUser, updateUserAvatar,
 } = require('../controllers/users');
 
 router
   .get('/', getUsers)
-  .get('/:id', getUser)
-  .post('/', createUser)
-  .patch('/me', updateUser)
-  .patch('/me/avatar', updateUserAvatar);
+  .get('/me', getUserInfo)
+  .get('/:id', celebrate({
+    params: Joi.object().keys({
+      id: Joi.string().required().hex().length(24),
+    }),
+  }), getUser)
+  .patch('/me', celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().required().min(2).max(30),
+      about: Joi.string().required().min(2).max(30),
+    }),
+  }), updateUser)
+  .patch('/me/avatar', celebrate({
+    body: Joi.object().keys({
+      avatar: Joi.string().required().regex(/^(https?:\/\/(www\.)?([a-zA-z0-9-]{1}[a-zA-z0-9-]*\.?)*\.{1}([a-zA-z0-9]){2,8}(\/?([a-zA-z0-9-])*\/?)*\/?([-._~:?#[]@!\$&'\(\)\*\+,;=])*)/),
+    }),
+  }), updateUserAvatar);
 
 module.exports = router;

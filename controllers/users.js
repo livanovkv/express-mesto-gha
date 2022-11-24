@@ -1,96 +1,160 @@
+const jwt = require('jsonwebtoken');
+
+const bcrypt = require('bcryptjs');
+
 const User = require('../models/user');
 
 const {
-  CODE_OK,
   CODE_CREATED,
-  CODE_BAD_REQUEST,
-  CODE_NOT_FOUND,
-  CODE_INTERNAL_SERVER_ERRORE,
   TEXT_ERRORE_NO_USER,
-  TEXT_ERRORE_DATA,
+  TEXT_ERRORE_VALIDATION,
+  TEXT_ERRORE_CONFLICT,
 } = require('../utils/constants');
 
-const { createdMessageError } = require('../utils/utils');
+const NotFoundError = require('../errors/NotFoundError');
 
-module.exports.getUsers = (req, res) => {
+const ValidationError = require('../errors/ValidationError');
+
+const ConflictError = require('../errors/ConflictError');
+
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => {
-      res.status(CODE_OK).send(users);
+      res
+        .send(users);
     })
-    .catch((err) => {
-      res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
-    });
+    .catch(next);
 };
-module.exports.getUser = (req, res) => {
+
+module.exports.getUsers = (req, res, next) => {
+  User
+    .find({})
+    .then((users) => {
+      res
+        .send(users);
+    })
+    .catch(next);
+};
+
+module.exports.getUser = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        throw new Error(TEXT_ERRORE_NO_USER);
+        throw new NotFoundError(TEXT_ERRORE_NO_USER);
       }
-      res.status(CODE_OK).send(user);
+      res
+        .send(user);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(CODE_BAD_REQUEST).send({ message: TEXT_ERRORE_DATA });
-      } else if (err.message === TEXT_ERRORE_NO_USER) {
-        res.status(CODE_NOT_FOUND).send(createdMessageError(err));
-      } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
-      }
-    });
+    .catch(next);
 };
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, req.body, {
     new: true,
     runValidators: true,
   })
     .then((user) => {
       if (!user) {
-        throw new Error(TEXT_ERRORE_NO_USER);
+        throw new NotFoundError(TEXT_ERRORE_NO_USER);
       }
-      res.status(CODE_OK).send(user);
+      res
+        .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(CODE_BAD_REQUEST).send(createdMessageError(err));
-      } else if (err.message === TEXT_ERRORE_NO_USER) {
-        res.status(CODE_NOT_FOUND).send(createdMessageError(err));
+        next(new ValidationError(TEXT_ERRORE_VALIDATION));
       } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
+        next(err);
       }
     });
 };
-module.exports.updateUserAvatar = (req, res) => {
+module.exports.updateUserAvatar = (req, res, next) => {
   User.findByIdAndUpdate(req.user._id, req.body, {
     new: true,
     runValidators: true,
   })
     .then((user) => {
       if (!user) {
-        throw new Error(TEXT_ERRORE_NO_USER);
+        throw new NotFoundError(TEXT_ERRORE_NO_USER);
       }
-      res.status(CODE_OK).send(user);
+      res
+        .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(CODE_BAD_REQUEST).send(createdMessageError(err));
-      } else if (err.message === TEXT_ERRORE_NO_USER) {
-        res.status(CODE_NOT_FOUND).send(createdMessageError(err));
+        next(new ValidationError(TEXT_ERRORE_VALIDATION));
       } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
+        next(err);
       }
     });
 };
-module.exports.createUser = (req, res) => {
-  User.create(req.body)
+module.exports.createUser = (req, res, next) => {
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => {
+      req.body.password = hash;
+      User
+        .create(req.body)
+        .then((user) => {
+          if (!user) {
+            throw new NotFoundError(TEXT_ERRORE_NO_USER);
+          }
+          res
+            .status(CODE_CREATED)
+            .send({
+              name: user.name,
+              about: user.about,
+              avatar: user.avatar,
+              email: user.email,
+              _id: user._id,
+            });
+        })
+        .catch((err) => {
+          if (err.name === 'ValidationError') {
+            next(new ValidationError(TEXT_ERRORE_VALIDATION));
+          } else if (err.name === 'MongoServerError') {
+            next(new ConflictError(TEXT_ERRORE_CONFLICT));
+          } else {
+            next(err);
+          }
+        });
+    })
+    .catch(next);
+};
+
+module.exports.login = (req, res, next) => {
+  const { NODE_ENV, JWT_SECRET } = process.env;
+  User
+    .findUserByCredentials(req.body)
     .then((user) => {
-      res.status(CODE_CREATED).send(user);
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production'
+          ? JWT_SECRET
+          : '637692aad0a0090428bc3fd0',
+        { expiresIn: '7d' },
+      );
+      res
+        .cookie('jwt', token, {
+          maxAge: 3600000,
+          httpOnly: true,
+        })
+        .send({ message: 'Всё верно!' });
+    })
+    .catch(next);
+};
+module.exports.getUserInfo = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError(TEXT_ERRORE_NO_USER);
+      }
+      res
+        .send(user);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(CODE_BAD_REQUEST).send(createdMessageError(err));
+        next(new ValidationError(TEXT_ERRORE_VALIDATION));
       } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
+        next(err);
       }
     });
 };

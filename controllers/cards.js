@@ -1,26 +1,28 @@
 const Card = require('../models/card');
 const {
-  CODE_OK,
   CODE_CREATED,
-  CODE_BAD_REQUEST,
-  CODE_NOT_FOUND,
-  CODE_INTERNAL_SERVER_ERRORE,
+  TEXT_ERRORE_VALIDATION,
+  TEXT_MESSAGE_DELETE_CARD,
+  TEXT_ERRORE_ACCESS,
   TEXT_ERRORE_NO_CARD,
-  TEXT_ERRORE_DATA,
 } = require('../utils/constants');
 
-const { createdMessageError } = require('../utils/utils');
+const ValidationError = require('../errors/ValidationError');
 
-module.exports.getCards = (req, res) => {
+const AccessError = require('../errors/AccessError');
+
+const NotFoundError = require('../errors/NotFoundError');
+
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => {
-      res.status(CODE_OK).send(cards);
+      res.send(cards);
     })
     .catch((err) => {
-      res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
+      next(err);
     });
 };
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
   Card.create({
     name,
@@ -32,36 +34,30 @@ module.exports.createCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(CODE_BAD_REQUEST).send(createdMessageError(err));
+        next(new ValidationError(TEXT_ERRORE_VALIDATION));
       } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
+        next(err);
       }
     });
 };
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.cardId)
+module.exports.deleteCard = (req, res, next) => {
+  Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
         throw new Error(TEXT_ERRORE_NO_CARD);
+      } else if (card.owner.toHexString() !== req.user._id) {
+        throw new AccessError(TEXT_ERRORE_ACCESS);
       }
-      res.status(CODE_OK).send({
-        message: 'Пост удалён',
-        card,
-      });
+      card
+        .remove()
+        .then(() => {
+          res.send({ message: TEXT_MESSAGE_DELETE_CARD, card });
+        })
+        .catch(next);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(CODE_BAD_REQUEST).send({
-          message: TEXT_ERRORE_DATA,
-        });
-      } else if (err.message === TEXT_ERRORE_NO_CARD) {
-        res.status(CODE_NOT_FOUND).send(createdMessageError(err));
-      } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
-      }
-    });
+    .catch(next);
 };
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     {
@@ -75,23 +71,14 @@ module.exports.likeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        throw new Error(TEXT_ERRORE_NO_CARD);
+        throw new NotFoundError(TEXT_ERRORE_NO_CARD);
       }
-      res.status(CODE_OK).send(card);
+      res
+        .send(card);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(CODE_BAD_REQUEST).send({
-          message: TEXT_ERRORE_DATA,
-        });
-      } else if (err.message === TEXT_ERRORE_NO_CARD) {
-        res.status(CODE_NOT_FOUND).send(createdMessageError(err));
-      } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
-      }
-    });
+    .catch(next);
 };
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     {
@@ -105,19 +92,10 @@ module.exports.dislikeCard = (req, res) => {
   )
     .then((card) => {
       if (!card) {
-        throw new Error(TEXT_ERRORE_NO_CARD);
+        throw new NotFoundError(TEXT_ERRORE_NO_CARD);
       }
-      res.status(CODE_OK).send(card);
+      res
+        .send(card);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(CODE_BAD_REQUEST).send({
-          message: 'Переданы некорректные данные для снятия лайка',
-        });
-      } else if (err.message === TEXT_ERRORE_NO_CARD) {
-        res.status(CODE_NOT_FOUND).send(createdMessageError(err));
-      } else {
-        res.status(CODE_INTERNAL_SERVER_ERRORE).send(createdMessageError(err));
-      }
-    });
+    .catch(next);
 };
