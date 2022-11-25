@@ -1,10 +1,10 @@
 const Card = require('../models/card');
 const {
   CODE_CREATED,
-  TEXT_ERRORE_VALIDATION,
+  TEXT_ERROR_VALIDATION,
   TEXT_MESSAGE_DELETE_CARD,
-  TEXT_ERRORE_ACCESS,
-  TEXT_ERRORE_NO_CARD,
+  TEXT_ERROR_ACCESS,
+  TEXT_ERROR_NO_CARD,
 } = require('../utils/constants');
 
 const ValidationError = require('../errors/ValidationError');
@@ -34,7 +34,7 @@ module.exports.createCard = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        next(new ValidationError(TEXT_ERRORE_VALIDATION));
+        next(new ValidationError(TEXT_ERROR_VALIDATION));
       } else {
         next(err);
       }
@@ -44,9 +44,9 @@ module.exports.deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new Error(TEXT_ERRORE_NO_CARD);
+        throw new Error(TEXT_ERROR_NO_CARD);
       } else if (card.owner.toHexString() !== req.user._id) {
-        throw new AccessError(TEXT_ERRORE_ACCESS);
+        throw new AccessError(TEXT_ERROR_ACCESS);
       }
       card
         .remove()
@@ -71,7 +71,7 @@ module.exports.likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError(TEXT_ERRORE_NO_CARD);
+        throw new NotFoundError(TEXT_ERROR_NO_CARD);
       }
       res
         .send(card);
@@ -92,7 +92,7 @@ module.exports.dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError(TEXT_ERRORE_NO_CARD);
+        throw new NotFoundError(TEXT_ERROR_NO_CARD);
       }
       res
         .send(card);
