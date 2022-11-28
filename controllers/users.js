@@ -5,6 +5,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
 const {
+  CODE_OK,
   CODE_CREATED,
   TEXT_ERROR_NO_USER,
   TEXT_ERROR_VALIDATION,
@@ -26,7 +27,6 @@ module.exports.getUsers = (req, res, next) => {
     })
     .catch(next);
 };
-
 module.exports.getUser = (req, res, next) => {
   User
     .findById(req.params.id)
@@ -35,6 +35,7 @@ module.exports.getUser = (req, res, next) => {
         throw new NotFoundError(TEXT_ERROR_NO_USER);
       }
       res
+        .status(CODE_OK)
         .send(user);
     })
     .catch(next);
@@ -50,6 +51,7 @@ module.exports.updateUser = (req, res, next) => {
         throw new NotFoundError(TEXT_ERROR_NO_USER);
       }
       res
+        .status(CODE_OK)
         .send(user);
     })
     .catch((err) => {
@@ -61,15 +63,17 @@ module.exports.updateUser = (req, res, next) => {
     });
 };
 module.exports.updateUserAvatar = (req, res, next) => {
-  User.findByIdAndUpdate(req.user._id, req.body, {
-    new: true,
-    runValidators: true,
-  })
+  User
+    .findByIdAndUpdate(req.user._id, req.body, {
+      new: true,
+      runValidators: true,
+    })
     .then((user) => {
       if (!user) {
         throw new NotFoundError(TEXT_ERROR_NO_USER);
       }
       res
+        .status(CODE_OK)
         .send(user);
     })
     .catch((err) => {
@@ -112,7 +116,6 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch(next);
 };
-
 module.exports.login = (req, res, next) => {
   const { NODE_ENV, JWT_SECRET } = process.env;
   User

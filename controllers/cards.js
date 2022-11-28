@@ -1,5 +1,6 @@
 const Card = require('../models/card');
 const {
+  CODE_OK,
   CODE_CREATED,
   TEXT_ERROR_VALIDATION,
   TEXT_MESSAGE_DELETE_CARD,
@@ -14,9 +15,12 @@ const AccessError = require('../errors/AccessError');
 const NotFoundError = require('../errors/NotFoundError');
 
 module.exports.getCards = (req, res, next) => {
-  Card.find({})
+  Card
+    .find({})
     .then((cards) => {
-      res.send(cards);
+      res
+        .status(CODE_OK)
+        .send(cards);
     })
     .catch((err) => {
       next(err);
@@ -24,13 +28,12 @@ module.exports.getCards = (req, res, next) => {
 };
 module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
-  Card.create({
-    name,
-    link,
-    owner: req.user._id,
-  })
+  Card
+    .create({ name, link, owner: req.user._id })
     .then((card) => {
-      res.status(CODE_CREATED).send(card);
+      res
+        .status(CODE_CREATED)
+        .send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -41,60 +44,52 @@ module.exports.createCard = (req, res, next) => {
     });
 };
 module.exports.deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  Card
+    .findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new Error(TEXT_ERROR_NO_CARD);
+        throw new NotFoundError(TEXT_ERROR_NO_CARD);
       } else if (card.owner.toHexString() !== req.user._id) {
         throw new AccessError(TEXT_ERROR_ACCESS);
       }
-      card
-        .remove()
+      card.remove()
         .then(() => {
-          res.send({ message: TEXT_MESSAGE_DELETE_CARD, card });
+          res
+            .status(CODE_OK)
+            .send({ message: TEXT_MESSAGE_DELETE_CARD, card });
         })
         .catch(next);
     })
     .catch(next);
 };
 module.exports.likeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    {
-      $addToSet: {
-        likes: req.user._id,
-      },
-    },
-    {
-      new: true,
-    },
-  )
+  Card
+    .findByIdAndUpdate(
+      req.params.cardId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true },
+    )
     .then((card) => {
       if (!card) {
         throw new NotFoundError(TEXT_ERROR_NO_CARD);
       }
-      res
-        .send(card);
+      res.send(card);
     })
     .catch(next);
 };
 module.exports.dislikeCard = (req, res, next) => {
-  Card.findByIdAndUpdate(
-    req.params.cardId,
-    {
-      $pull: {
-        likes: req.user._id,
-      },
-    },
-    {
-      new: true,
-    },
-  )
+  Card
+    .findByIdAndUpdate(
+      req.params.cardId,
+      { $pull: { likes: req.user._id } },
+      { new: true },
+    )
     .then((card) => {
       if (!card) {
         throw new NotFoundError(TEXT_ERROR_NO_CARD);
       }
       res
+        .status(CODE_OK)
         .send(card);
     })
     .catch(next);
