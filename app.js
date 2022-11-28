@@ -1,10 +1,8 @@
 require('dotenv').config();
 
 const express = require('express');
-
-const mongoose = require('mongoose');
-
 const helmet = require('helmet');
+const mongoose = require('mongoose');
 
 const bodyParser = require('body-parser');
 
@@ -31,9 +29,9 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 
 const {
-  CODE_INTERNAL_SERVER_ERRORE,
-  TEXT_ERRORE_INTERNAL_SERVER,
-  TEXT_ERRORE_NOT_FOUND,
+  CODE_INTERNAL_SERVER_ERROR,
+  TEXT_ERROR_INTERNAL_SERVER,
+  TEXT_ERROR_NOT_FOUND,
 } = require('./utils/constants');
 
 const NotFoundError = require('./errors/NotFoundError');
@@ -70,18 +68,18 @@ app.use(auth);
 app.use('/users', usersRouter);
 app.use('/cards', cardsRouter);
 app.use('/', (req, res, next) => {
-  next(new NotFoundError(TEXT_ERRORE_NOT_FOUND));
+  next(new NotFoundError(TEXT_ERROR_NOT_FOUND));
 });
 
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  const { statusCode = CODE_INTERNAL_SERVER_ERRORE, message } = err;
+  const { statusCode = CODE_INTERNAL_SERVER_ERROR, message } = err;
   res
     .status(statusCode)
     .send({
-      message: statusCode === CODE_INTERNAL_SERVER_ERRORE
-        ? TEXT_ERRORE_INTERNAL_SERVER
+      message: statusCode === CODE_INTERNAL_SERVER_ERROR
+        ? TEXT_ERROR_INTERNAL_SERVER
         : message,
     });
   next();

@@ -1,6 +1,6 @@
 module.exports.CODE_OK = 200;
 
-module.exports.CODE_INTERNAL_SERVER_ERRORE = 500;
+module.exports.CODE_INTERNAL_SERVER_ERROR = 500;
 
 module.exports.TEXT_ERROR_NO_USER = 'Такого пользователя нет';
 
